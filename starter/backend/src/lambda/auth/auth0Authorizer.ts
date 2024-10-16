@@ -1,10 +1,15 @@
 import Axios from 'axios'
 import jsonwebtoken from 'jsonwebtoken'
 import { createLogger } from '../../utils/logger.mjs'
+//import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
+import 'source-map-support/register'
+import { verify } from 'jsonwebtoken'
+import { JwtPayload } from '../../auth/JwtPayload'
+import axios from 'axios'
 
 const logger = createLogger('auth')
 
-const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
+const jwksUrl = 'https://dev-px8na0x7vzwg6b4i.us.auth0.com/.well-known/jwks.json'
 
 export async function handler(event) {
   try {
@@ -43,11 +48,22 @@ export async function handler(event) {
 }
 
 async function verifyToken(authHeader) {
-  const token = getToken(authHeader)
-  const jwt = jsonwebtoken.decode(token, { complete: true })
+  logger.info("Verifying token");
+  const token = getToken(authHeader);
+  const jwt = jsonwebtoken.decode(token, { complete: true });
 
   // TODO: Implement token verification
-  return undefined;
+  const respone = await Axios.get(jwksUrl);
+  const keys = respone.data.keys;
+  const signingKeys = keys.find(key => key.kid === jwt?.header.kid);
+  logger.info('signingKeys', signingKeys);
+  if (!signingKeys) {
+    throw new Error('The JWKS endpoint did not contain any keys');
+  }
+
+  const pemData = signingKeys.x5c[0];
+  const cert = `-----BEGIN CERTIFICATE-----\n${pemData}\n-----END CERTIFICATE-----`
+  return verify(token, cert, { algorithms: ['RS256'] }) as JwtPayload;
 }
 
 function getToken(authHeader) {
