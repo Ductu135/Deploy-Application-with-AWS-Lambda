@@ -1,17 +1,17 @@
+import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
 import Axios from 'axios'
 import jsonwebtoken from 'jsonwebtoken'
-import { createLogger } from '../../utils/logger.mjs'
-//import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
-import 'source-map-support/register'
+import { createLogger } from '../../utils/logger.js'
+
 import { verify } from 'jsonwebtoken'
 import { JwtPayload } from '../../auth/JwtPayload'
-import axios from 'axios'
 
 const logger = createLogger('auth')
 
 const jwksUrl = 'https://dev-px8na0x7vzwg6b4i.us.auth0.com/.well-known/jwks.json'
 
-export async function handler(event) {
+export const handler = async (event): Promise<CustomAuthorizerResult> => {
+  logger.info('Authorizing a user', event.authorizationToken)
   try {
     const jwtToken = await verifyToken(event.authorizationToken)
 
