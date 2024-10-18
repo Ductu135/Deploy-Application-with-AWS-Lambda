@@ -13,7 +13,7 @@ export async function getTodos(idToken) {
     }
   )
   console.log('Todos:', response.data)
-  return response.data.items
+  return response.data.item
 }
 
 export async function createTodo(idToken, newTodo) {
