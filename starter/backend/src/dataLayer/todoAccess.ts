@@ -70,8 +70,8 @@ export class TodosAccess {
             },
             ReturnValues: 'UPDATED_NEW'
         }).promise()
-
-        return todoUpdate as TodoUpdate;
+        console.log("response.Attributes ", response.Attributes)
+        return response.Attributes as TodoUpdate;
     }
 
     deleteTodoItem = async (userId: string, todoId: string): Promise<string> => {

@@ -17,11 +17,17 @@ export const handler = middy(
     // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
     let userId = getUserId(event) ?? "";
     console.log("userId ", userId);
-    await updateTodo(userId as string, todoId as string, todoUpdate);
+    const response = await updateTodo(userId as string, todoId as string, todoUpdate);
+    console.log("update response ", response)
 
     return {
-      statusCode: 204,
-      body: "Update Todo Item successfully"
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({
+        item: response
+      })
     }
   }
 );
