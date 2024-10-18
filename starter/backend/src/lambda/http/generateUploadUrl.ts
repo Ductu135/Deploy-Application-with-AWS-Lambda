@@ -10,7 +10,7 @@ export const handler =  middy(
   const userId = getUserId(event);
 
   // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
-  const url = await createAttachmentPresignedUrl(todoId as string);
+  const uploadUrl = await createAttachmentPresignedUrl(todoId as string);
 
   return {
     statusCode: 201,
@@ -18,7 +18,7 @@ export const handler =  middy(
       'Access-Control-Allow-Origin': '*'
     },
     body: JSON.stringify({
-      url: url
+      uploadUrl: uploadUrl
     })
   }
 })
