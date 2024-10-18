@@ -68,7 +68,7 @@ export class TodosAccess {
             ExpressionAttributeNames: {
                 '#name': 'name'
             },
-            ReturnValues: 'New Update'
+            ReturnValues: 'UPDATED_NEW'
         }).promise()
 
         return todoUpdate as TodoUpdate;

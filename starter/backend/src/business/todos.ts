@@ -45,6 +45,7 @@ export const updateTodo =  async (userId: string, todoId: string, todoUpdate: Up
     var updateItem = {
         ...todoUpdate
     }
+    console.log("UpdateItem ", updateItem)
     return await todoAccess.updateTodoItem(userId, todoId, updateItem);
 }
 
