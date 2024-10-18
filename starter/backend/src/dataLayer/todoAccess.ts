@@ -17,7 +17,9 @@ export class TodosAccess {
     ) {}
 
     getAllTodos = async (userId: string) : Promise<TodoItem[]> => {
-        logger.info("Getting all todods");
+        logger.info("Getting all todos");
+        console.log("userId ", userId);
+        console.log("todosIndex ", this.todosIndex);
 
         const result = await this.documentClient.query({
             TableName: this.todosTable as string,
