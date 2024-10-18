@@ -2,9 +2,13 @@ org: tuducbui135
 app: serverless-todo-app
 service: serverless-todo-app
 
+package:
+  patterns:
+    - '!node_modules/**'
+  individually: true
+
 plugins:
   - serverless-iam-roles-per-function
-  - serverless-reqvalidator-plugin
 
 frameworkVersion: '4'
 
@@ -40,21 +44,6 @@ provider:
             - xray:PutTraceSegments
           Resource: "*"
 
-# custom:
-#   documentation:
-#     api:
-#       info:
-#         version: v1.0.0
-#         title: Todos API
-#         description: Serverless application
-#     models:
-#       - name: create-todo-model
-#         contentType: application/json
-#         schema: ${file(models/create-todo-model.json)}
-#       - name: update-todo-model
-#         contentType: application/json
-#         schema: ${file(models/update-todo-model.json)}
-
 functions:
 
   Auth:
@@ -76,7 +65,6 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
-    iamRoleStatementsInherit: true
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-get-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
@@ -94,7 +82,7 @@ functions:
         Resource:
           - '*'
 
-#   # TODO: Configure this function
+  # TODO: Configure this function
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
@@ -106,7 +94,6 @@ functions:
           request: 
             schemas: 
               application/json: ${file(models/create-todo-model.json)}
-    iamRoleStatementsInherit: true
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-create-todo-role-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
@@ -120,32 +107,80 @@ functions:
         Resource:
           - "*"
 
-#   # TODO: Configure this function
-#   UpdateTodo:
-#     handler: src/lambda/http/updateTodo.handler
-#     events:
-#       - http:
-#           method: patch
-#           path: todos/{todoId}
-#           cors: true
+  # TODO: Configure this function
+  UpdateTodo:
+    handler: src/lambda/http/updateTodo.handler
+    events:
+      - http:
+          method: patch
+          path: todos/{todoId}
+          cors: true
+          authorizer: Auth
+          request: 
+            schemas: 
+              application/json: ${file(models/update-todo-model.json)}
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-update-todo-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
+        Resource:
+          - "*"
 
-#   # TODO: Configure this function
-#   DeleteTodo:
-#     handler: src/lambda/http/deleteTodo.handler
-#     events:
-#       - http:
-#           method: delete
-#           path: todos/{todoId}
-#           cors: true
+  # TODO: Configure this function
+  DeleteTodo:
+    handler: src/lambda/http/deleteTodo.handler
+    events:
+      - http:
+          method: delete
+          path: todos/{todoId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-delete-todo-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${aws:region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
+        Resource:
+          - "*"
 
-#   # TODO: Configure this function
-#   GenerateUploadUrl:
-#     handler: src/lambda/http/generateUploadUrl.handler
-#     events:
-#       - http:
-#           method: post
-#           path: todos/{todoId}/attachment
-#           cors: true
+  # TODO: Configure this function
+  GenerateUploadUrl:
+    handler: src/lambda/http/generateUploadUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/{todoId}/attachment
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-generate-s3-url-role-${self:provider.stage}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - s3:*
+        Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENT_S3_BUCKET}/*
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - xray:PutTraceSegments
+          - xray:PutTelemetryRecords
+        Resource:
+          - '*'
 
 resources:
   Resources:

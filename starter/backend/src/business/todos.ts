@@ -5,7 +5,7 @@ import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 import { createLogger } from '../utils/logger'
 import * as uuid from 'uuid'
-import * as createError from 'http-errors'
+import { TodoUpdate } from '../models/TodoUpdate';
 
 const logger = createLogger("TodoAccess");
 const attachmentUtils = new AttachmentUtils();
@@ -16,7 +16,6 @@ export const getTodosForUser = async (userId: string): Promise<TodoItem[]> => {
     console.log("Getting Todo item list", userId);
     return await todoAccess.getAllTodos(userId);
 }
-
 
 //Create
 export const createTodo = async (newTodo: CreateTodoRequest, userId: string) : Promise<TodoItem> => {
@@ -38,4 +37,24 @@ export const createTodo = async (newTodo: CreateTodoRequest, userId: string) : P
     console.log("createTodo newItem ", newItem);
 
     return await todoAccess.createTodoItem(newItem);
+}
+
+//Update
+export const updateTodo =  async (userId: string, todoId: string, todoUpdate: UpdateTodoRequest): Promise<TodoUpdate> => {
+    logger.info("Updating item");
+    var updateItem = {
+        ...todoUpdate
+    }
+    return await todoAccess.updateTodoItem(userId, todoId, updateItem);
+}
+
+//Delete
+export const deleteTodo =  async (userId: string, todoId: string): Promise<string> => {
+    logger.info("Deleting item");
+    return await todoAccess.deleteTodoItem(userId, todoId);
+}
+
+//Generate Url
+export const createAttachmentPresignedUrl = async (todoId: string): Promise<string> => {
+    return attachmentUtils.getUploadUrl(todoId);
 }
