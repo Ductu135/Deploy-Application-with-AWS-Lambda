@@ -34,15 +34,6 @@ provider:
     
   logs:
     restApi: true
-  
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action: 
-            - xray:PutTelemetryRecords
-            - xray:PutTraceSegments
-          Resource: "*"
 
 functions:
 

@@ -10,6 +10,7 @@ import {
   Image,
   Loader
 } from 'semantic-ui-react'
+import Axios from 'axios'
 
 import { useAuth0 } from '@auth0/auth0-react'
 import { useNavigate } from 'react-router-dom'
@@ -63,7 +64,7 @@ export function Todos() {
                 </Button>
               </Grid.Column>
               {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
+                <Image src={todo.attachmentUrl} style={{display: todo.isShowImg ? "block" : "none"}} size="small" wrapped />
               )}
               <Grid.Column width={16}>
                 <Divider />
@@ -74,6 +75,17 @@ export function Todos() {
       </Grid>
     )
   }
+
+  async function imageExists (image_url) {
+    try {
+      const response = await Axios.get(image_url);
+      if (response?.status == 200) {
+        return true
+      }
+    } catch (error) {
+      return false;
+    }
+  };
 
   async function onTodoDelete(todoId) {
     try {
@@ -134,6 +146,10 @@ export function Todos() {
         })
         console.log('Access token: ' + accessToken)
         const todos = await getTodos(accessToken)
+        for (let i = 0; i < todos.length; i++) {
+          const res = await imageExists(todos[i].attachmentUrl);
+          todos[i].isShowImg = res;
+        }
         setTodos(todos)
         setLoadingTodos(false)
       } catch (e) {
